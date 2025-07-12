@@ -1,0 +1,38 @@
+
+
+services:
+  # 1. MongoDB Database Service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Backend Service
+  backend:
+    build: ./backend
+    container_name: backend-app
+    ports:
+      - "5001:5001"
+    environment:
+      # Use the Docker service name 'mongodb' as the host
+      MONGO_URI: mongodb://mongodb:27017/goaltrackerdb
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 5001
+    depends_on:
+      - mongodb
+
+  # 3. Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: frontend-app
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+    driver: local
